@@ -1,13 +1,52 @@
 import { updatePrimaryPalette, updateSurfacePalette } from '@primeuix/themes'
-import { computed, ref } from 'vue'
+import { computed, type ComputedRef, type Ref, ref } from 'vue'
 
-const appState = ref({
+interface ColorPalette {
+  0?: string
+  50: string
+  100: string
+  200: string
+  300: string
+  400: string
+  500: string
+  600: string
+  700: string
+  800: string
+  900: string
+  950: string
+}
+
+interface ColorScheme {
+  name: string
+  palette: ColorPalette
+}
+
+interface AppState {
+  primary: string
+  surface: string | null
+  darkMode: boolean
+}
+
+interface UseLayoutReturn {
+  primaryColors: Ref<ColorScheme[]>
+  surfaces: Ref<ColorScheme[]>
+  isDarkMode: ComputedRef<boolean>
+  primary: ComputedRef<string>
+  surface: ComputedRef<string | null>
+  toggleDarkMode: () => void
+  setDarkMode: (value: boolean) => void
+  setPrimary: (value: string) => void
+  setSurface: (value: string) => void
+  updateColors: (type: 'primary' | 'surface', colorName: string) => void
+}
+
+const appState: Ref<AppState> = ref({
   primary: 'emerald',
   surface: null,
   darkMode: false,
 })
 
-const primaryColors = ref([
+const primaryColors: Ref<ColorScheme[]> = ref([
   {
     name: 'emerald',
     palette: {
@@ -266,7 +305,7 @@ const primaryColors = ref([
   },
 ])
 
-const surfaces = ref([
+const surfaces: Ref<ColorScheme[]> = ref([
   {
     name: 'slate',
     palette: {
@@ -405,16 +444,16 @@ const surfaces = ref([
   },
 ])
 
-export function useLayout() {
-  function setPrimary(value) {
+export function useLayout(): UseLayoutReturn {
+  function setPrimary(value: string): void {
     appState.value.primary = value
   }
 
-  function setSurface(value) {
+  function setSurface(value: string): void {
     appState.value.surface = value
   }
 
-  function setDarkMode(value) {
+  function setDarkMode(value: boolean): void {
     appState.value.darkMode = value
     if (value) {
       document.documentElement.classList.add('p-dark')
@@ -423,20 +462,24 @@ export function useLayout() {
     }
   }
 
-  function toggleDarkMode() {
+  function toggleDarkMode(): void {
     appState.value.darkMode = !appState.value.darkMode
     document.documentElement.classList.toggle('p-dark')
   }
 
-  function updateColors(type, colorName) {
+  function updateColors(type: 'primary' | 'surface', colorName: string): void {
     if (type === 'primary') {
       setPrimary(colorName)
       const color = primaryColors.value.find((c) => c.name === colorName)
-      updatePrimaryPalette(color.palette)
+      if (color) {
+        updatePrimaryPalette(color.palette)
+      }
     } else if (type === 'surface') {
       setSurface(colorName)
       const surfaceColor = surfaces.value.find((s) => s.name === colorName)
-      updateSurfacePalette(surfaceColor.palette)
+      if (surfaceColor) {
+        updateSurfacePalette(surfaceColor.palette)
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useLayout } from '@/composables/useLayout'
+import { useLayout } from '@/composables/useLayout.ts'
 import AppConfig from './AppConfig.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { ref } from 'vue'

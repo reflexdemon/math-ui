@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useLayout } from '../composables/useLayout'
+import { useLayout } from '@/composables/useLayout.ts'
 
 const { primaryColors, surfaces, primary, surface, isDarkMode, updateColors } = useLayout()
 </script>

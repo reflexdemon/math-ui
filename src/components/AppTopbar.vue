@@ -3,13 +3,18 @@ import { useLayout } from '@/composables/useLayout.ts'
 import AppConfig from './AppConfig.vue'
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
-import { Menubar } from 'primevue'
+import { Menubar, Toast } from 'primevue'
 
 const items = ref([
   {
     label: 'Home',
     icon: 'pi pi-home',
     route: '/',
+  },
+  {
+    label: 'Simple Math Problems',
+    icon: 'pi pi-minus',
+    route: '/simple-math',
   },
   {
     label: 'About',
@@ -22,7 +27,8 @@ const { isDarkMode, toggleDarkMode } = useLayout()
 </script>
 
 <template>
-  <div class="topbar">
+  <Toast />
+  <div class="topbar" style="border-radius: 3rem; padding: 1rem 1rem 1rem 1.5rem">
     <div class="topbar-container">
       <div class="topbar-brand">
         <svg

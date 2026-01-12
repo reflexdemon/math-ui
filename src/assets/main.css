@@ -514,7 +514,7 @@ body {
   margin-right: auto;
   border: 1px solid var(--p-surface-200);
   width: 100%;
-  position: absolute;
+  position: relative;
   bottom: 0;
 
   /* And if you want the div to be full-width: */

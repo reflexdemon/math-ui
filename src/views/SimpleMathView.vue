@@ -1,93 +1,70 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import InputNumber from 'primevue/inputnumber'
-import Card from 'primevue/card'
-import { Button, Fieldset, FloatLabel } from 'primevue'
+import { Button } from 'primevue'
 import { useToast } from 'primevue/usetoast'
+import MathComponent from '@/components/MathComponent.vue'
+import type { MathConfig } from '@/types/MathConfig.ts'
+import _ from 'lodash'
 
 const toast = useToast()
 
-const addMin = ref(0)
-const addMax = ref(999)
-const addSize = ref(10)
+const config = ref<MathConfig[]>([
+  {
+    min: 0,
+    max: 999,
+    size: 10,
+    operator: '+',
+    match: 'add',
+  },
+  {
+    min: 0,
+    max: 999,
+    size: 10,
+    operator: '-',
+    match: 'sub',
+  },
+  {
+    min: 0,
+    max: 999,
+    size: 10,
+    operator: '*',
+    match: 'mul',
+  },
+  {
+    min: 0,
+    max: 999,
+    size: 10,
+    operator: '/',
+    match: 'div',
+  },
+])
+
 function generate(): void {
-  toast.add({
-    severity: 'info',
-    summary: 'Generating Add using',
-    detail: `addMin = ${addMin.value}, addMax = ${addMax.value}, addSize= ${addSize.value}`,
-    life: 3000,
-  })
+  _.forEach(config.value, (c) =>
+    toast.add({
+      severity: 'info',
+      summary: 'Generated Values',
+      detail: `min = ${c.min}, max = ${c.max}, size= ${c.size} and operator = ${c.operator}`,
+      life: 3000,
+    }),
+  )
 }
 </script>
 
 <template>
-  <Card class="p-fluid">
-    <template #title>Simple Math Problems</template>
-    <template #content>
-      <div class="flex-auto">
-        <Fieldset legend="Addition">
-          <div class="flex-auto">
-            <FloatLabel variant="on">
-              <InputNumber
-                id="min-value"
-                v-model="addMin"
-                :max="999"
-                :min="0"
-                buttonLayout="horizontal"
-                showButtons
-                ><template #incrementbuttonicon>
-                  <span class="pi pi-plus" />
-                </template>
-                <template #decrementbuttonicon>
-                  <span class="pi pi-minus" />
-                </template>
-              </InputNumber>
-              <label for="min-value">Minimum Value</label>
-            </FloatLabel>
-            <div class="flex-auto">
-              <FloatLabel variant="on">
-                <InputNumber
-                  id="max-value"
-                  v-model="addMax"
-                  :max="999"
-                  :min="0"
-                  buttonLayout="horizontal"
-                  showButtons
-                >
-                  <template #incrementbuttonicon>
-                    <span class="pi pi-plus" />
-                  </template>
-                  <template #decrementbuttonicon> <span class="pi pi-minus" /> </template
-                ></InputNumber>
-                <label for="max-value">Maximum Value</label>
-              </FloatLabel>
-            </div>
-            <div class="flex-auto">
-              <FloatLabel variant="on">
-                <InputNumber
-                  id="size-value"
-                  v-model="addSize"
-                  :max="999"
-                  :min="0"
-                  buttonLayout="horizontal"
-                  showButtons
-                >
-                  <template #incrementbuttonicon>
-                    <span class="pi pi-plus" />
-                  </template>
-                  <template #decrementbuttonicon> <span class="pi pi-minus" /> </template
-                ></InputNumber>
-                <label for="size-value">Size</label>
-              </FloatLabel>
-            </div>
-          </div>
-        </Fieldset>
-      </div>
-      <div class="flex-auto">
-        <Button class="p-button-raised" label="Generate" @click="generate" />
-      </div>
-    </template>
-  </Card>
+  <MathComponent
+    v-for="(addConfig, index) in config.values()"
+    :key="index"
+    v-model:max="addConfig.max"
+    v-model:min="addConfig.min"
+    v-model:size="addConfig.size"
+    :match="addConfig.match"
+    :operator="addConfig.operator"
+  />
+
+  <div class="flex-auto">
+    <Button class="p-button-raised" label="Generate" @click="generate" />
+  </div>
 </template>
 
 <style scoped></style>

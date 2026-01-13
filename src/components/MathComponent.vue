@@ -3,17 +3,40 @@ import { Fieldset, FloatLabel } from 'primevue'
 import InputNumber from 'primevue/inputnumber'
 import Card from 'primevue/card'
 import _ from 'lodash'
+import type { DisplayConfig } from '@/types/DisplayConfig.ts'
 
-const titleContent = [
-  { match: 'add', operator: '+', header: 'Addition', title: 'Addition Configuration' },
-  { match: 'sub', operator: '-', header: 'Subtraction', title: 'Subtraction Configuration' },
-  { match: 'mul', operator: '*', header: 'Multiplication', title: 'Multiplication Configuration' },
-  { match: 'div', operator: '/', header: 'Division', title: 'Division Configuration' },
+const titleContent: DisplayConfig[] = [
+  {
+    match: 'add',
+    operator: '+',
+    header: 'Addition',
+    title: 'Addition Configuration',
+  } as DisplayConfig,
+  {
+    match: 'sub',
+    operator: '-',
+    header: 'Subtraction',
+    title: 'Subtraction Configuration',
+  } as DisplayConfig,
+  {
+    match: 'mul',
+    operator: '*',
+    header: 'Multiplication',
+    title: 'Multiplication Configuration',
+  } as DisplayConfig,
+  {
+    match: 'div',
+    operator: '/',
+    header: 'Division',
+    title: 'Division Configuration',
+  } as DisplayConfig,
 ]
 
 const props = defineProps(['operator', 'match'])
 
-const { header, title } = _.last(_.filter(titleContent, (t) => t.match == props.match))
+const { header, title } = _.last(
+  _.filter(titleContent, (t) => t.match == props.match),
+) as DisplayConfig
 
 const min = defineModel('min', { default: 0 })
 const max = defineModel('max', { default: 999 })

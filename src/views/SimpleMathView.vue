@@ -4,11 +4,6 @@ import { Button } from 'primevue'
 import { useToast } from 'primevue/usetoast'
 import MathComponent from '@/components/MathComponent.vue'
 import type { MathConfig } from '@/types/MathConfig.ts'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import _ from 'lodash'
 
 const toast = useToast()
@@ -57,32 +52,36 @@ function generate(): void {
 </script>
 
 <template>
-  <Tabs value="+">
-    <TabList>
-      <Tab v-for="(addConfig, index) in config.values()" :key="index" :value="addConfig.operator">{{
-        addConfig.match
-      }}</Tab>
-    </TabList>
-    <TabPanels>
-      <TabPanel
-        v-for="(addConfig, index) in config.values()"
-        :key="index"
-        :value="addConfig.operator"
-      >
-        <MathComponent
-          v-model:max="addConfig.max"
-          v-model:min="addConfig.min"
-          v-model:size="addConfig.size"
-          :match="addConfig.match"
-          :operator="addConfig.operator"
-        />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
+  <div class="cards-container">
+    <MathComponent
+      v-for="(addConfig, index) in config.values()"
+      :key="index"
+      v-model:max="addConfig.max"
+      v-model:min="addConfig.min"
+      v-model:size="addConfig.size"
+      :match="addConfig.match"
+      :operator="addConfig.operator"
+    />
+  </div>
 
-  <div class="flex-auto">
+  <div class="button-container">
     <Button class="p-button-raised" label="Generate" @click="generate" />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+</style>

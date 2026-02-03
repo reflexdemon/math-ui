@@ -48,21 +48,20 @@ const size = defineModel('size', { default: 10 })
     <template #title>{{ title }}</template>
     <template #content>
       <Fieldset :legend="header">
-        <div class="grid grid-cols-4 gap-4">
-          <div class="">
-            <label class="" for="min-value">Minimum Value</label>
-          </div>
-          <div>
+        <div class="config-container">
+          <div class="config-item">
+            <label for="min-value">Minimum Value</label>
             <InputNumber
               id="min-value"
               v-model="min"
               :max="999"
               :min="0"
               buttonLayout="vertical"
+              class="input-number"
               showButtons
               size="small"
-              style="width: 100px"
-              ><template #incrementbuttonicon>
+            >
+              <template #incrementbuttonicon>
                 <span class="pi pi-plus" />
               </template>
               <template #decrementbuttonicon>
@@ -71,46 +70,46 @@ const size = defineModel('size', { default: 10 })
             </InputNumber>
           </div>
 
-          <div class="">
-            <label class="" for="max-value">Maximum Value</label>
-          </div>
-          <div>
+          <div class="config-item">
+            <label for="max-value">Maximum Value</label>
             <InputNumber
               id="max-value"
               v-model="max"
               :max="999"
               :min="0"
               buttonLayout="vertical"
+              class="input-number"
               showButtons
               size="small"
-              style="width: 100px"
             >
               <template #incrementbuttonicon>
                 <span class="pi pi-plus" />
               </template>
-              <template #decrementbuttonicon> <span class="pi pi-minus" /> </template
-            ></InputNumber>
+              <template #decrementbuttonicon>
+                <span class="pi pi-minus" />
+              </template>
+            </InputNumber>
           </div>
 
-          <div class="">
-            <label class="" for="size-value">Size</label>
-          </div>
-          <div>
+          <div class="config-item">
+            <label for="size-value">Size</label>
             <InputNumber
               id="size-value"
               v-model="size"
               :max="999"
               :min="0"
               buttonLayout="vertical"
+              class="input-number"
               showButtons
               size="small"
-              style="width: 100px"
             >
               <template #incrementbuttonicon>
                 <span class="pi pi-plus" />
               </template>
-              <template #decrementbuttonicon> <span class="pi pi-minus" /> </template
-            ></InputNumber>
+              <template #decrementbuttonicon>
+                <span class="pi pi-minus" />
+              </template>
+            </InputNumber>
           </div>
         </div>
       </Fieldset>
@@ -118,4 +117,21 @@ const size = defineModel('size', { default: 10 })
   </Card>
 </template>
 
-<style scoped></style>
+<style scoped>
+.config-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.input-number {
+  width: 5ch;
+}
+</style>

@@ -43,7 +43,7 @@ interface UseLayoutReturn {
 const appState: Ref<AppState> = ref({
   primary: 'emerald',
   surface: null,
-  darkMode: false,
+  darkMode: true,
 })
 
 const primaryColors: Ref<ColorScheme[]> = ref([

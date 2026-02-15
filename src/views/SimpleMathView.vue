@@ -13,28 +13,28 @@ const config = ref<MathConfig[]>([
   {
     min: 100,
     max: 999,
-    size: 9,
+    size: 6,
     operator: '+',
     match: 'add',
   },
   {
     min: 100,
     max: 999,
-    size: 8,
+    size: 6,
     operator: '-',
     match: 'sub',
   },
   {
     min: 1,
     max: 12,
-    size: 5,
+    size: 6,
     operator: '*',
     match: 'mul',
   },
   {
     min: 1,
     max: 99,
-    size: 5,
+    size: 6,
     operator: '/',
     match: 'div',
   },
@@ -171,7 +171,7 @@ function downloadPdf(): void {
 <style scoped>
 .cards-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
   padding: 1rem 0;

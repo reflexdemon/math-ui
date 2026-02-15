@@ -26,7 +26,7 @@ const config = ref<MathConfig[]>([
   },
   {
     min: 1,
-    max: 99,
+    max: 12,
     size: 5,
     operator: '*',
     match: 'mul',
@@ -147,7 +147,7 @@ function downloadPdf(): void {
 
   <div v-if="results.length > 0" class="button-container">
     <Button class="p-button-raised" label="Generate" @click="generate" />
-    <Button class="p-button-raised p-button-success" label="Download PDF" @click="downloadPdf" />
+    <Button class="p-button-raised p-button-success" label="Print Problems" @click="downloadPdf" />
   </div>
 
   <div v-else class="button-container">

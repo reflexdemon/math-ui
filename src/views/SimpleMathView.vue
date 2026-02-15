@@ -13,28 +13,28 @@ const config = ref<MathConfig[]>([
   {
     min: 100,
     max: 999,
-    size: 10,
+    size: 9,
     operator: '+',
     match: 'add',
   },
   {
     min: 100,
     max: 999,
-    size: 10,
+    size: 8,
     operator: '-',
     match: 'sub',
   },
   {
     min: 1,
     max: 99,
-    size: 10,
+    size: 5,
     operator: '*',
     match: 'mul',
   },
   {
     min: 1,
     max: 99,
-    size: 10,
+    size: 5,
     operator: '/',
     match: 'div',
   },
@@ -66,6 +66,70 @@ function generate(): void {
 
   results.value = _.shuffle(allResults)
 }
+
+function downloadPdf(): void {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+  const filename = `math-problems-${timestamp}.pdf`
+
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+
+  const content = results.value
+    .map(
+      (item) => `
+      <div style="text-align: right; font-family: monospace; margin-bottom: 20px; page-break-inside: avoid;">
+        <div style="font-weight: bold;">${Math.max(item.firstNumber, item.secondNumber)}</div>
+        <div>${item.operator} ${Math.min(item.firstNumber, item.secondNumber)}</div>
+        <div style="color: #888;">----------</div>
+        <div style="color: #888;">----------</div>
+      </div>
+    `,
+    )
+    .join('')
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${filename}</title>
+        <style>
+          body {
+            font-family: monospace;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+          }
+          @media print {
+            body { margin: 0; }
+            .grid { grid-template-columns: repeat(3, 1fr); }
+          }
+        </style>
+      </head>
+      <body>
+        <h1 style="text-align: center; margin-bottom: 30px;">Math Problems</h1>
+        <div class="grid">
+          ${content}
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        <\/script>
+      </body>
+    </html>
+  `
+
+  printWindow.document.write(html)
+  printWindow.document.close()
+}
 </script>
 
 <template>
@@ -81,7 +145,12 @@ function generate(): void {
     />
   </div>
 
-  <div class="button-container">
+  <div v-if="results.length > 0" class="button-container">
+    <Button class="p-button-raised" label="Generate" @click="generate" />
+    <Button class="p-button-raised p-button-success" label="Download PDF" @click="downloadPdf" />
+  </div>
+
+  <div v-else class="button-container">
     <Button class="p-button-raised" label="Generate" @click="generate" />
   </div>
 

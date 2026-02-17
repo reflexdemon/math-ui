@@ -56,18 +56,9 @@ const size = defineModel('size', { default: 10 })
               v-model="min"
               :max="999"
               :min="0"
-              buttonLayout="vertical"
               class="input-number"
-              showButtons
               size="small"
-            >
-              <template #incrementbuttonicon>
-                <span class="pi pi-plus" />
-              </template>
-              <template #decrementbuttonicon>
-                <span class="pi pi-minus" />
-              </template>
-            </InputNumber>
+            />
           </div>
 
           <div class="config-item">
@@ -77,18 +68,9 @@ const size = defineModel('size', { default: 10 })
               v-model="max"
               :max="999"
               :min="0"
-              buttonLayout="vertical"
               class="input-number"
-              showButtons
               size="small"
-            >
-              <template #incrementbuttonicon>
-                <span class="pi pi-plus" />
-              </template>
-              <template #decrementbuttonicon>
-                <span class="pi pi-minus" />
-              </template>
-            </InputNumber>
+            />
           </div>
 
           <div class="config-item">
@@ -98,18 +80,9 @@ const size = defineModel('size', { default: 10 })
               v-model="size"
               :max="999"
               :min="0"
-              buttonLayout="vertical"
               class="input-number"
-              showButtons
               size="small"
-            >
-              <template #incrementbuttonicon>
-                <span class="pi pi-plus" />
-              </template>
-              <template #decrementbuttonicon>
-                <span class="pi pi-minus" />
-              </template>
-            </InputNumber>
+            />
           </div>
         </div>
       </Fieldset>
@@ -120,18 +93,22 @@ const size = defineModel('size', { default: 10 })
 <style scoped>
 .config-container {
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .config-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   align-items: center;
+  gap: 0.5rem;
 }
 
-.input-number {
-  width: 5ch;
+.config-item label {
+  width: 120px;
+  text-align: right;
+}
+
+.input-number :deep(input) {
+  width: 8ch;
 }
 </style>

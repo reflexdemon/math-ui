@@ -1,8 +1,5 @@
-# multiplication-tables-pdf-export Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change add-multiplication-tables. Update Purpose after archive.
-## Requirements
 ### Requirement: Export multiplication tables to PDF
 
 The system SHALL provide a PDF export button that downloads all multiplication tables as a printable document with all 12 tables on a single page.
@@ -27,4 +24,3 @@ The system SHALL provide a PDF export button that downloads all multiplication t
 - **AND** all 12 tables fit on one page
 - **AND** font size is reduced to fit content
 - **AND** spacing between tables is minimized
-

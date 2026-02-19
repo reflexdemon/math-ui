@@ -45,7 +45,7 @@ function downloadPdf(): void {
     }
     tablesHtml += `
       <div class="table-container">
-        <h3>Multiplication Table ${tableNum}</h3>
+        <h3>✏️ Table ${tableNum}</h3>
         <table>
           ${rows}
         </table>
@@ -61,45 +61,60 @@ function downloadPdf(): void {
         <style>
           body {
             font-family: Arial, sans-serif;
-            padding: 20px;
+            padding: 10px;
+            margin: 0;
           }
           h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin: 5px 0;
+            font-size: 24px;
+          }
+          h2 {
+            text-align: center;
+            margin: 5px 0 15px 0;
+            font-size: 16px;
+            color: #666;
           }
           .tables-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
           }
           .table-container {
             page-break-inside: avoid;
+            border: 1px solid #333;
+            padding: 5px;
           }
           table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 11px;
           }
           td {
-            padding: 4px 8px;
+            padding: 2px 4px;
             text-align: right;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #ccc;
           }
           td.result {
             font-weight: bold;
           }
           h3 {
-            margin-bottom: 10px;
-            border-bottom: 2px solid #333;
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
           }
           @media print {
-            body { margin: 0; padding: 10px; }
-            .tables-grid { grid-template-columns: repeat(3, 1fr); }
+            body { margin: 0; padding: 5px; }
+            .tables-grid { grid-template-columns: repeat(4, 1fr); }
             .table-container { page-break-inside: avoid; }
           }
         </style>
       </head>
       <body>
-        <h1>Multiplication Tables (1-12)</h1>
+        <h1>🌟 ⭐ ✨ Multiplication Tables ✨ ⭐ 🌟</h1>
+        <h2>📚 Times Tables 1-12 📚</h2>
         <div class="tables-grid">
           ${tablesHtml}
         </div>

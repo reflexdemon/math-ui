@@ -18,6 +18,11 @@ const items = ref([
     route: '/simple-math',
   },
   {
+    label: 'Multiplication Tables',
+    icon: 'pi pi-th-large',
+    route: '/multiplication-tables',
+  },
+  {
     label: 'About',
     icon: 'pi pi-info-circle',
     route: '/about',

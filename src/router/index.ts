@@ -25,6 +25,11 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/SimpleMathView.vue'),
     },
+    {
+      path: '/multiplication-tables',
+      name: 'multiplication-tables',
+      component: () => import('../views/MultiplicationTablesView.vue'),
+    },
   ],
 })
 

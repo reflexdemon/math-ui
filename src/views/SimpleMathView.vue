@@ -135,7 +135,7 @@ function downloadPdf(): void {
 <template>
   <div class="cards-container">
     <MathComponent
-      v-for="(addConfig, index) in config.values()"
+      v-for="(addConfig, index) in config"
       :key="index"
       v-model:max="addConfig.max"
       v-model:min="addConfig.min"

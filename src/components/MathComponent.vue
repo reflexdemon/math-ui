@@ -11,32 +11,33 @@ const titleContent: DisplayConfig[] = [
     operator: '+',
     header: 'Addition',
     title: 'Addition Configuration',
-  } as DisplayConfig,
+  },
   {
     match: 'sub',
     operator: '-',
     header: 'Subtraction',
     title: 'Subtraction Configuration',
-  } as DisplayConfig,
+  },
   {
     match: 'mul',
     operator: '*',
     header: 'Multiplication',
     title: 'Multiplication Configuration',
-  } as DisplayConfig,
+  },
   {
     match: 'div',
     operator: '/',
     header: 'Division',
     title: 'Division Configuration',
-  } as DisplayConfig,
+  },
 ]
 
 const props = defineProps(['operator', 'match'])
 
-const { header, title } = _.last(
-  _.filter(titleContent, (t) => t.match == props.match),
-) as DisplayConfig
+const { header, title } = (_.last(_.filter(titleContent, (t) => t.match == props.match)) ?? {
+  header: '',
+  title: '',
+}) as DisplayConfig
 
 const min = defineModel('min', { default: 0 })
 const max = defineModel('max', { default: 999 })

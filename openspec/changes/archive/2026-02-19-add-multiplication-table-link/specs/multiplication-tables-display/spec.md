@@ -1,10 +1,4 @@
-# multiplication-tables-display Specification
-
-## Purpose
-
-TBD - created by archiving change add-multiplication-tables. Update Purpose after archive.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Display multiplication tables 1-12
 

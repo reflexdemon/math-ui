@@ -44,8 +44,12 @@ import Button from 'primevue/button'
             <div class="tip">
               <span class="tip-icon">🐛</span>
               <span>Found a bug or have a cool idea?</span>
-              <a href="https://github.com" target="_blank" class="github-link">
-                <Button label="Tell us on GitHub" icon="pi pi-github" size="small" text />
+              <a
+                class="github-link"
+                href="https://github.com/reflexdemon/math-ui/issues"
+                target="_blank"
+              >
+                <Button icon="pi pi-github" label="Tell us on GitHub" size="small" text />
               </a>
             </div>
           </div>
@@ -68,16 +72,25 @@ import Button from 'primevue/button'
   color: var(--p-surface-900);
 }
 
+.p-dark .about {
+  background-color: var(--p-surface-900);
+  color: var(--p-surface-0);
+}
+
 .content-wrapper {
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .title {
   text-align: center;
-  color: var(--p-surface-900);
   font-size: 2.5rem;
   margin-bottom: 2rem;
+}
+
+.p-dark .title {
+  color: var(--p-surface-0);
 }
 
 .overview-card,
@@ -85,6 +98,11 @@ import Button from 'primevue/button'
   margin-bottom: 1.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.p-dark .overview-card,
+.p-dark .links-card {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .operations-grid {

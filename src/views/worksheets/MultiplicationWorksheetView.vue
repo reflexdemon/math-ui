@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { Button } from 'primevue'
+import { Button, Checkbox } from 'primevue'
 import { useLayout } from '@/composables/useLayout.ts'
 
 const { isDarkMode } = useLayout()
@@ -12,6 +12,23 @@ interface Problem {
   userAnswer: number | null
   isCorrect: boolean | null
 }
+
+interface TableGroup {
+  table: number
+  problems: Problem[]
+}
+
+const selectedTables = ref<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+const allTablesSelected = computed({
+  get: () => selectedTables.value.length === 12,
+  set: (value: boolean) => {
+    if (value) {
+      selectedTables.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    } else {
+      selectedTables.value = []
+    }
+  },
+})
 
 const problems = ref<Problem[]>([])
 const isStarted = ref(false)
@@ -37,6 +54,19 @@ function generateProblems(): void {
 
 generateProblems()
 
+const tableGroups = computed<TableGroup[]>(() => {
+  return selectedTables.value.map((tableNum) => ({
+    table: tableNum,
+    problems: problems.value
+      .filter((p) => p.table === tableNum)
+      .sort((a, b) => a.multiplier - b.multiplier),
+  }))
+})
+
+const filteredProblems = computed(() => {
+  return problems.value.filter((p) => selectedTables.value.includes(p.table))
+})
+
 const formattedTime = computed(() => {
   const minutes = Math.floor(elapsedSeconds.value / 60)
   const seconds = elapsedSeconds.value % 60
@@ -44,14 +74,35 @@ const formattedTime = computed(() => {
 })
 
 const correctCount = computed(() => {
-  return problems.value.filter((p) => p.isCorrect === true).length
+  return filteredProblems.value.filter((p) => p.isCorrect === true).length
 })
 
 const incorrectCount = computed(() => {
-  return problems.value.filter((p) => p.isCorrect === false).length
+  return filteredProblems.value.filter((p) => p.isCorrect === false).length
 })
 
+const scorePercentage = computed(() => {
+  const total = filteredProblems.value.length
+  if (total === 0) return 0
+  return Math.round((correctCount.value / total) * 100)
+})
+
+const isHighScore = computed(() => scorePercentage.value >= 90)
+
+function toggleTable(tableNum: number): void {
+  const index = selectedTables.value.indexOf(tableNum)
+  if (index === -1) {
+    selectedTables.value.push(tableNum)
+  } else {
+    selectedTables.value.splice(index, 1)
+  }
+}
+
 function startWorksheet(): void {
+  if (selectedTables.value.length === 0) {
+    alert('Please select at least one table to practice.')
+    return
+  }
   isStarted.value = true
   elapsedSeconds.value = 0
   timerInterval = setInterval(() => {
@@ -65,7 +116,7 @@ function verifyAnswers(): void {
     timerInterval = null
   }
 
-  problems.value.forEach((problem) => {
+  filteredProblems.value.forEach((problem) => {
     if (problem.userAnswer === null) {
       problem.isCorrect = false
     } else {
@@ -96,8 +147,10 @@ function printWorksheet(): void {
   const printWindow = window.open('', '_blank')
   if (!printWindow) return
 
+  const tablesToPrint = selectedTables.value
+
   let tablesHtml = ''
-  for (let table = 1; table <= 12; table++) {
+  for (const table of tablesToPrint) {
     let rows = ''
     for (let multiplier = 1; multiplier <= 12; multiplier++) {
       rows += `
@@ -182,9 +235,113 @@ function printWorksheet(): void {
       </head>
       <body>
         <h1>Multiplication Worksheet</h1>
-        <h2>Tables 1-12 - Write your answers</h2>
+        <h2>Tables ${tablesToPrint.join(', ')} - Write your answers</h2>
         <div class="tables-grid">
           ${tablesHtml}
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        <\/script>
+      </body>
+    </html>
+  `
+
+  printWindow.document.write(html)
+  printWindow.document.close()
+}
+
+function printCertificate(): void {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+  const filename = `multiplication-certificate-${timestamp}.pdf`
+
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+
+  const tablesList = selectedTables.value.join(', ')
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${filename}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+          }
+          .certificate {
+            border: 8px solid #ffd700;
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 0%, #fff8e7 100%);
+            max-width: 600px;
+          }
+          .trophy {
+            font-size: 80px;
+            margin-bottom: 20px;
+          }
+          h1 {
+            color: #b8860b;
+            font-size: 36px;
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+          }
+          .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 20px 0;
+          }
+          .details {
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+          }
+          .tables-info {
+            font-size: 16px;
+            color: #888;
+            margin-top: 30px;
+          }
+          .congrats {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+          }
+          @media print {
+            body { 
+              padding: 20px; 
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .certificate {
+              border-width: 4px;
+              padding: 20px 30px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="certificate">
+          <div class="trophy">🎖️</div>
+          <h1>Certificate of Achievement</h1>
+          <p class="congrats">Congratulations!</p>
+          <p class="details">You have successfully completed the</p>
+          <p class="details">Multiplication Worksheet</p>
+          <div class="score">${scorePercentage.value}%</div>
+          <p class="details">${correctCount.value} out of ${filteredProblems.value.length} correct</p>
+          <p class="tables-info">Tables practiced: ${tablesList}</p>
         </div>
         <script>
           window.onload = function() {
@@ -227,6 +384,26 @@ onUnmounted(() => {
       </div>
     </div>
 
+    <div v-if="!isStarted" class="table-selection">
+      <h3>Select Tables to Practice</h3>
+      <div class="selection-header">
+        <Checkbox v-model="allTablesSelected" :binary="true" inputId="selectAll" />
+        <label for="selectAll" class="select-all-label">Select All</label>
+      </div>
+      <div class="table-checkboxes">
+        <div v-for="tableNum in 12" :key="tableNum" class="table-checkbox">
+          <Checkbox
+            :modelValue="selectedTables.includes(tableNum)"
+            :inputId="'table-' + tableNum"
+            :binary="true"
+            :disabled="isStarted"
+            @update:modelValue="toggleTable(tableNum)"
+          />
+          <label :for="'table-' + tableNum">Table {{ tableNum }}</label>
+        </div>
+      </div>
+    </div>
+
     <div v-if="isVerified" class="results-summary">
       <h2>Results Summary</h2>
       <div class="summary-stats">
@@ -239,7 +416,7 @@ onUnmounted(() => {
           <span class="stat-label">Incorrect</span>
         </div>
         <div class="stat total">
-          <span class="stat-value">{{ problems.length }}</span>
+          <span class="stat-value">{{ filteredProblems.length }}</span>
           <span class="stat-label">Total</span>
         </div>
         <div class="stat time">
@@ -247,33 +424,44 @@ onUnmounted(() => {
           <span class="stat-label">Time</span>
         </div>
       </div>
+
+      <div v-if="isHighScore" class="certificate-section">
+        <div class="trophy-icon">🎖️</div>
+        <p class="congrats-text">Congratulations! You scored {{ scorePercentage }}%!</p>
+        <Button label="Print Certificate" severity="success" @click="printCertificate" />
+      </div>
     </div>
 
     <div class="tables-grid">
-      <div
-        v-for="(problem, index) in problems"
-        :key="index"
-        class="problem-card"
-        :class="{
-          'is-correct': isVerified && problem.isCorrect === true,
-          'is-incorrect': isVerified && problem.isCorrect === false,
-        }"
-      >
-        <div class="problem-expression">
-          <span class="number">{{ problem.table }}</span>
-          <span class="operator">×</span>
-          <span class="number">{{ problem.multiplier }}</span>
-          <span class="operator">=</span>
-        </div>
-        <input
-          v-model.number="problem.userAnswer"
-          type="number"
-          class="answer-input"
-          :disabled="!isStarted || isVerified"
-          :placeholder="isVerified ? problem.correctAnswer.toString() : '?'"
-        />
-        <div v-if="isVerified && problem.isCorrect === false" class="correct-answer">
-          Correct: {{ problem.correctAnswer }}
+      <div v-for="group in tableGroups" :key="group.table" class="table-card">
+        <h3 class="table-header">Table {{ group.table }}</h3>
+        <div class="problems-list">
+          <div
+            v-for="(problem, index) in group.problems"
+            :key="index"
+            class="problem-row"
+            :class="{
+              'is-correct': isVerified && problem.isCorrect === true,
+              'is-incorrect': isVerified && problem.isCorrect === false,
+            }"
+          >
+            <span class="problem-expression">
+              <span class="number">{{ problem.table }}</span>
+              <span class="operator">×</span>
+              <span class="number">{{ problem.multiplier }}</span>
+              <span class="operator">=</span>
+            </span>
+            <input
+              v-model.number="problem.userAnswer"
+              type="number"
+              class="answer-input"
+              :readonly="isVerified"
+              :placeholder="isVerified ? problem.correctAnswer.toString() : '?'"
+            />
+            <span v-if="isVerified && problem.isCorrect === false" class="correct-answer">
+              ({{ problem.correctAnswer }})
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -317,6 +505,50 @@ onUnmounted(() => {
 .p-dark .timer-display {
   background-color: var(--p-surface-800);
   color: var(--p-surface-0);
+}
+
+.table-selection {
+  background-color: var(--p-surface-100);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.p-dark .table-selection {
+  background-color: var(--p-surface-800);
+}
+
+.table-selection h3 {
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.selection-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.select-all-label {
+  font-weight: bold;
+}
+
+.table-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.table-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-checkbox label {
+  cursor: pointer;
 }
 
 .results-summary {
@@ -400,57 +632,109 @@ onUnmounted(() => {
   font-size: 0.875rem;
 }
 
+.certificate-section {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff 0%, #fff8e7 100%);
+  border-radius: 12px;
+  border: 3px solid #ffd700;
+}
+
+.p-dark .certificate-section {
+  background: linear-gradient(135deg, #2d2d2d 0%, #3d3d1a 100%);
+}
+
+.trophy-icon {
+  font-size: 4rem;
+}
+
+.congrats-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #b8860b;
+  margin: 1rem 0;
+}
+
+.p-dark .congrats-text {
+  color: #ffd700;
+}
+
 .tables-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
-.problem-card {
+.table-card {
   background-color: var(--p-surface-100);
-  border-radius: 8px;
-  padding: 0.75rem;
+  border-radius: 12px;
+  padding: 1rem;
   border: 2px solid var(--p-surface-200);
-  text-align: center;
-  transition: all 0.2s ease;
 }
 
-.p-dark .problem-card {
+.p-dark .table-card {
   background-color: var(--p-surface-800);
   border-color: var(--p-surface-600);
 }
 
-.problem-card.is-correct {
-  border-color: #28a745;
+.table-header {
+  margin: 0 0 1rem 0;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--p-surface-300);
+}
+
+.p-dark .table-header {
+  border-bottom-color: var(--p-surface-500);
+}
+
+.problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.problem-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background-color: var(--p-surface-50);
+}
+
+.p-dark .problem-row {
+  background-color: var(--p-surface-700);
+}
+
+.problem-row.is-correct {
   background-color: #d4edda;
+  border: 1px solid #28a745;
 }
 
-.p-dark .problem-card.is-correct {
+.p-dark .problem-row.is-correct {
   background-color: #1b4332;
-  border-color: #28a745;
 }
 
-.problem-card.is-incorrect {
-  border-color: #dc3545;
+.problem-row.is-incorrect {
   background-color: #f8d7da;
+  border: 1px solid #dc3545;
 }
 
-.p-dark .problem-card.is-incorrect {
+.p-dark .problem-row.is-incorrect {
   background-color: #4a1c1c;
-  border-color: #dc3545;
 }
 
 .problem-expression {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 0.5rem;
+  min-width: 80px;
 }
 
 .number {
   font-weight: bold;
-  font-size: 1.1rem;
 }
 
 .operator {
@@ -458,8 +742,8 @@ onUnmounted(() => {
 }
 
 .answer-input {
-  width: 80px;
-  padding: 0.5rem;
+  width: 70px;
+  padding: 0.4rem;
   font-size: 1rem;
   text-align: center;
   border: 1px solid var(--p-surface-300);
@@ -469,25 +753,24 @@ onUnmounted(() => {
 }
 
 .p-dark .answer-input {
-  background-color: var(--p-surface-700);
+  background-color: var(--p-surface-600);
   border-color: var(--p-surface-500);
   color: var(--p-surface-0);
 }
 
-.answer-input:disabled {
+.answer-input[readonly] {
   background-color: var(--p-surface-200);
-  cursor: not-allowed;
+  cursor: default;
 }
 
-.p-dark .answer-input:disabled {
-  background-color: var(--p-surface-800);
+.p-dark .answer-input[readonly] {
+  background-color: var(--p-surface-700);
 }
 
 .correct-answer {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
   color: #dc3545;
   font-weight: bold;
+  font-size: 0.875rem;
 }
 
 .p-dark .correct-answer {
@@ -501,7 +784,11 @@ onUnmounted(() => {
   }
 
   .tables-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .table-checkboxes {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .summary-stats {

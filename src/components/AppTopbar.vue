@@ -13,9 +13,20 @@ const items = ref([
     route: '/',
   },
   {
-    label: 'Simple Math Problems',
-    icon: 'pi pi-minus',
-    route: '/simple-math',
+    label: 'Work Sheets',
+    icon: 'pi pi-file',
+    items: [
+      {
+        label: 'All Worksheets',
+        icon: 'pi pi-list',
+        route: '/worksheets',
+      },
+      {
+        label: 'Simple Math Problems',
+        icon: 'pi pi-calculator',
+        route: '/worksheets/simple-math',
+      },
+    ],
   },
   {
     label: 'Multiplication Tables',
@@ -48,15 +59,33 @@ const { isDarkMode, toggleDarkMode } = useLayout()
       <AppConfig />
     </div>
     <div class="card">
-      <Menubar :model="items">
+      <Menubar :model="items" aria-label="Main navigation">
         <template #item="{ item, props, hasSubmenu }">
-          <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-            <a v-ripple :href="href" v-bind="props.action" @click="navigate">
+          <router-link
+            v-if="item.route && !item.items"
+            v-slot="{ href, navigate }"
+            :to="item.route"
+            custom
+          >
+            <a
+              v-ripple
+              :href="href"
+              v-bind="props.action"
+              @click="navigate"
+              :aria-label="String(item.label)"
+            >
               <span :class="item.icon" />
               <span>{{ item.label }}</span>
             </a>
           </router-link>
-          <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+          <a
+            v-else
+            v-ripple
+            :href="item.url"
+            :target="item.target"
+            v-bind="props.action"
+            :aria-label="String(item.label)"
+          >
             <span :class="item.icon" />
             <span>{{ item.label }}</span>
             <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down" />

@@ -30,6 +30,23 @@ const router = createRouter({
       name: 'multiplication-tables',
       component: () => import('../views/MultiplicationTablesView.vue'),
     },
+    {
+      path: '/worksheets',
+      name: 'worksheets',
+      component: () => import('../views/worksheets/WorksheetsIndex.vue'),
+      children: [
+        {
+          path: '',
+          name: 'worksheets-home',
+          component: () => import('../views/worksheets/WorksheetsView.vue'),
+        },
+        {
+          path: 'simple-math',
+          name: 'worksheets-simple-math',
+          component: () => import('../views/SimpleMathView.vue'),
+        },
+      ],
+    },
   ],
 })
 

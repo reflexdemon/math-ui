@@ -45,6 +45,11 @@ const router = createRouter({
           name: 'worksheets-simple-math',
           component: () => import('../views/SimpleMathView.vue'),
         },
+        {
+          path: 'multiplication-tables',
+          name: 'worksheets-multiplication-tables',
+          component: () => import('../views/worksheets/MultiplicationWorksheetView.vue'),
+        },
       ],
     },
   ],

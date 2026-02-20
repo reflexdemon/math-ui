@@ -20,6 +20,14 @@ const worksheets: Worksheet[] = [
     icon: 'pi pi-calculator',
   },
   {
+    id: 'multiplication-worksheet',
+    title: 'Multiplication Worksheet',
+    description:
+      'Practice multiplication tables 1-12 with timed exercises and answer verification.',
+    route: '/worksheets/multiplication-tables',
+    icon: 'pi pi-times',
+  },
+  {
     id: 'multiplication-tables',
     title: 'Multiplication Tables',
     description: 'View reference tables for numbers 1 through 12.',

@@ -1,0 +1,1 @@
+import{_ as o,c as s,b as r,r as t,o as a}from"./index-CyMTPHe_.js";const n={},c={class:"worksheets-index",role:"main","aria-label":"Worksheets module"};function _(d,i){const e=t("router-view");return a(),s("main",c,[r(e)])}const m=o(n,[["render",_],["__scopeId","data-v-0a7f4649"]]);export{m as default};

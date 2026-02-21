@@ -26,6 +26,11 @@ const items = ref([
         icon: 'pi pi-calculator',
         route: '/worksheets/simple-math',
       },
+      {
+        label: 'Multiplication Worksheet',
+        icon: 'pi pi-check-square',
+        route: '/worksheets/multiplication-tables',
+      },
     ],
   },
   {

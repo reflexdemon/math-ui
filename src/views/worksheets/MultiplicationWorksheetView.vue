@@ -1,70 +1,59 @@
 <script lang="ts" setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { Button, Checkbox } from 'primevue'
 import { useLayout } from '@/composables/useLayout.ts'
+import {
+  type Problem,
+  type TableGroup,
+  generateProblems,
+  filterProblemsByTables,
+  groupProblemsByTable,
+  verifyAnswers,
+  resetProblems,
+} from '@/services/MultiplicationProblem.ts'
+import {
+  saveSelectedTables,
+  loadSelectedTables,
+  getDefaultTables,
+} from '@/services/TableProvider.ts'
+import { printWorksheet, printCertificate } from '@/services/PrintService.ts'
 
 const { isDarkMode } = useLayout()
 
-interface Problem {
-  table: number
-  multiplier: number
-  correctAnswer: number
-  userAnswer: number | null
-  isCorrect: boolean | null
-}
-
-interface TableGroup {
-  table: number
-  problems: Problem[]
-}
-
-const selectedTables = ref<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+const selectedTables = ref<number[]>(loadSelectedTables())
 const allTablesSelected = computed({
   get: () => selectedTables.value.length === 12,
   set: (value: boolean) => {
     if (value) {
-      selectedTables.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      selectedTables.value = getDefaultTables()
+      saveSelectedTables(selectedTables.value)
     } else {
       selectedTables.value = []
+      saveSelectedTables(selectedTables.value)
     }
   },
 })
 
-const problems = ref<Problem[]>([])
+watch(
+  selectedTables,
+  (newTables) => {
+    saveSelectedTables(newTables)
+  },
+  { deep: true },
+)
+
+const problems = ref<Problem[]>(generateProblems())
 const isStarted = ref(false)
 const isVerified = ref(false)
 const elapsedSeconds = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 
-function generateProblems(): void {
-  const result: Problem[] = []
-  for (let table = 1; table <= 12; table++) {
-    for (let multiplier = 1; multiplier <= 12; multiplier++) {
-      result.push({
-        table,
-        multiplier,
-        correctAnswer: table * multiplier,
-        userAnswer: null,
-        isCorrect: null,
-      })
-    }
-  }
-  problems.value = result
-}
-
-generateProblems()
-
 const tableGroups = computed<TableGroup[]>(() => {
-  return selectedTables.value.map((tableNum) => ({
-    table: tableNum,
-    problems: problems.value
-      .filter((p) => p.table === tableNum)
-      .sort((a, b) => a.multiplier - b.multiplier),
-  }))
+  return groupProblemsByTable(problems.value, selectedTables.value)
 })
 
 const filteredProblems = computed(() => {
-  return problems.value.filter((p) => selectedTables.value.includes(p.table))
+  return filterProblemsByTables(problems.value, selectedTables.value)
 })
 
 const formattedTime = computed(() => {
@@ -89,6 +78,8 @@ const scorePercentage = computed(() => {
 
 const isHighScore = computed(() => scorePercentage.value >= 90)
 
+const hasTablesSelected = computed(() => selectedTables.value.length > 0)
+
 function toggleTable(tableNum: number): void {
   const index = selectedTables.value.indexOf(tableNum)
   if (index === -1) {
@@ -99,10 +90,6 @@ function toggleTable(tableNum: number): void {
 }
 
 function startWorksheet(): void {
-  if (selectedTables.value.length === 0) {
-    alert('Please select at least one table to practice.')
-    return
-  }
   isStarted.value = true
   elapsedSeconds.value = 0
   timerInterval = setInterval(() => {
@@ -110,19 +97,12 @@ function startWorksheet(): void {
   }, 1000)
 }
 
-function verifyAnswers(): void {
+function verifyAnswersHandler(): void {
   if (timerInterval) {
     clearInterval(timerInterval)
     timerInterval = null
   }
-
-  filteredProblems.value.forEach((problem) => {
-    if (problem.userAnswer === null) {
-      problem.isCorrect = false
-    } else {
-      problem.isCorrect = problem.userAnswer === problem.correctAnswer
-    }
-  })
+  verifyAnswers(filteredProblems.value)
   isVerified.value = true
 }
 
@@ -134,229 +114,20 @@ function resetWorksheet(): void {
     clearInterval(timerInterval)
     timerInterval = null
   }
-  problems.value.forEach((problem) => {
-    problem.userAnswer = null
-    problem.isCorrect = null
-  })
+  resetProblems(problems.value)
 }
 
-function printWorksheet(): void {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-  const filename = `multiplication-worksheet-${timestamp}.pdf`
-
-  const printWindow = window.open('', '_blank')
-  if (!printWindow) return
-
-  const tablesToPrint = selectedTables.value
-
-  let tablesHtml = ''
-  for (const table of tablesToPrint) {
-    let rows = ''
-    for (let multiplier = 1; multiplier <= 12; multiplier++) {
-      rows += `
-        <tr>
-          <td>${table}</td>
-          <td>×</td>
-          <td>${multiplier}</td>
-          <td>=</td>
-          <td class="answer-box"></td>
-        </tr>
-      `
-    }
-    tablesHtml += `
-      <div class="table-container">
-        <h3>Table ${table}</h3>
-        <table>
-          ${rows}
-        </table>
-      </div>
-    `
-  }
-
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${filename}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 10px;
-            margin: 0;
-          }
-          h1 {
-            text-align: center;
-            margin: 5px 0;
-            font-size: 24px;
-          }
-          h2 {
-            text-align: center;
-            margin: 5px 0 15px 0;
-            font-size: 16px;
-            color: #666;
-          }
-          .tables-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-          }
-          .table-container {
-            page-break-inside: avoid;
-            border: 1px solid #333;
-            padding: 5px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-          }
-          td {
-            padding: 2px 4px;
-            text-align: right;
-            border-bottom: 1px solid #ccc;
-          }
-          td.answer-box {
-            width: 30px;
-            border-bottom: 1px solid #000;
-          }
-          h3 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-            padding-bottom: 3px;
-          }
-          @media print {
-            body { margin: 0; padding: 5px; }
-            .tables-grid { grid-template-columns: repeat(4, 1fr); }
-            .table-container { page-break-inside: avoid; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1>Multiplication Worksheet</h1>
-        <h2>Tables ${tablesToPrint.join(', ')} - Write your answers</h2>
-        <div class="tables-grid">
-          ${tablesHtml}
-        </div>
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = function() {
-              window.close();
-            };
-          };
-        <\/script>
-      </body>
-    </html>
-  `
-
-  printWindow.document.write(html)
-  printWindow.document.close()
+function handlePrintWorksheet(): void {
+  printWorksheet(selectedTables.value)
 }
 
-function printCertificate(): void {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-  const filename = `multiplication-certificate-${timestamp}.pdf`
-
-  const printWindow = window.open('', '_blank')
-  if (!printWindow) return
-
-  const tablesList = selectedTables.value.join(', ')
-
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${filename}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-          }
-          .certificate {
-            border: 8px solid #ffd700;
-            border-radius: 20px;
-            padding: 40px 60px;
-            text-align: center;
-            background: linear-gradient(135deg, #fff 0%, #fff8e7 100%);
-            max-width: 600px;
-          }
-          .trophy {
-            font-size: 80px;
-            margin-bottom: 20px;
-          }
-          h1 {
-            color: #b8860b;
-            font-size: 36px;
-            margin: 0 0 20px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-          }
-          .score {
-            font-size: 48px;
-            font-weight: bold;
-            color: #28a745;
-            margin: 20px 0;
-          }
-          .details {
-            font-size: 18px;
-            color: #666;
-            margin: 20px 0;
-          }
-          .tables-info {
-            font-size: 16px;
-            color: #888;
-            margin-top: 30px;
-          }
-          .congrats {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 10px;
-          }
-          @media print {
-            body { 
-              padding: 20px; 
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .certificate {
-              border-width: 4px;
-              padding: 20px 30px;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="certificate">
-          <div class="trophy">🎖️</div>
-          <h1>Certificate of Achievement</h1>
-          <p class="congrats">Congratulations!</p>
-          <p class="details">You have successfully completed the</p>
-          <p class="details">Multiplication Worksheet</p>
-          <div class="score">${scorePercentage.value}%</div>
-          <p class="details">${correctCount.value} out of ${filteredProblems.value.length} correct</p>
-          <p class="tables-info">Tables practiced: ${tablesList}</p>
-        </div>
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = function() {
-              window.close();
-            };
-          };
-        <\/script>
-      </body>
-    </html>
-  `
-
-  printWindow.document.write(html)
-  printWindow.document.close()
+function handlePrintCertificate(): void {
+  printCertificate(
+    scorePercentage.value,
+    correctCount.value,
+    filteredProblems.value.length,
+    selectedTables.value,
+  )
 }
 
 onUnmounted(() => {
@@ -372,15 +143,21 @@ onUnmounted(() => {
       <h1>Multiplication Worksheet</h1>
       <div class="header-actions">
         <div v-if="isStarted && !isVerified" class="timer-display">Time: {{ formattedTime }}</div>
-        <Button v-if="!isStarted" label="Start" severity="success" @click="startWorksheet" />
+        <Button
+          v-if="!isStarted"
+          label="Start"
+          severity="success"
+          :disabled="!hasTablesSelected"
+          @click="startWorksheet"
+        />
         <Button
           v-if="isStarted && !isVerified"
           label="Verify"
           severity="info"
-          @click="verifyAnswers"
+          @click="verifyAnswersHandler"
         />
         <Button v-if="isVerified" label="Reset" severity="secondary" @click="resetWorksheet" />
-        <Button label="Print" @click="printWorksheet" />
+        <Button label="Print" :disabled="!hasTablesSelected" @click="handlePrintWorksheet" />
       </div>
     </div>
 
@@ -428,7 +205,7 @@ onUnmounted(() => {
       <div v-if="isHighScore" class="certificate-section">
         <div class="trophy-icon">🎖️</div>
         <p class="congrats-text">Congratulations! You scored {{ scorePercentage }}%!</p>
-        <Button label="Print Certificate" severity="success" @click="printCertificate" />
+        <Button label="Print Certificate" severity="success" @click="handlePrintCertificate" />
       </div>
     </div>
 
@@ -455,6 +232,7 @@ onUnmounted(() => {
               v-model.number="problem.userAnswer"
               type="number"
               class="answer-input"
+              :disabled="!isStarted || isVerified"
               :readonly="isVerified"
               :placeholder="isVerified ? problem.correctAnswer.toString() : '?'"
             />
@@ -750,6 +528,11 @@ onUnmounted(() => {
   border-radius: 4px;
   background-color: var(--p-surface-0);
   color: var(--p-surface-900);
+}
+
+.answer-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .p-dark .answer-input {

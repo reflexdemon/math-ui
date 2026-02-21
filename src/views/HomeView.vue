@@ -34,7 +34,7 @@ import Button from 'primevue/button'
         <template #title>🚀 Quick Links</template>
         <template #content>
           <div class="links-grid">
-            <router-link class="link-item" to="/simple-math">
+            <router-link class="link-item" to="/worksheets/simple-math">
               <Button icon="pi pi-calculator" label="Start Practicing" severity="success" />
             </router-link>
             <router-link class="link-item" to="/multiplication-tables">

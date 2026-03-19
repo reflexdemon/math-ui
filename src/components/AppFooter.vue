@@ -14,12 +14,7 @@ const year = new Date().getFullYear()
         >
           <i class="pi pi-twitter footer-icon"></i>
         </a>
-        <a
-          class="footer-link"
-          href="https://problem.vpv.io"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <a class="footer-link" href="https://math.vpv.io" rel="noopener noreferrer" target="_blank">
           <i class="pi pi-globe footer-icon"></i>
         </a>
         <!--        <a-->
